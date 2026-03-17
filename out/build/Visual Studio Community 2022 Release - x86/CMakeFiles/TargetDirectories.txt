@@ -1,0 +1,8 @@
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/LibraryProject.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/Experimental.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/Nightly.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/Continuous.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/NightlyMemoryCheck.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/RUN_TESTS.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/ALL_BUILD.dir
+C:/Users/bavut/Desktop/LibraryProject/out/build/Visual Studio Community 2022 Release - x86/CMakeFiles/ZERO_CHECK.dir

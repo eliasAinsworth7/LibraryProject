@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\bavut\Desktop\LibraryProject\out\build\Visual Studio Community 2022 Release - x86\CMakeFiles\bec2dd20d533dc0d54a43962cafd4930\Experimental.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\bavut\Desktop\LibraryProject\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\bavut\Desktop\LibraryProject\out\build\Visual Studio Community 2022 Release - x86\CMakeFiles\Experimental" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{BF00DDCF-8B22-3D65-AEBF-AE4C06FA5B2E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
