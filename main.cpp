@@ -254,11 +254,6 @@ class Checkout : public Transaction {
 
     public:
         Checkout(std::shared_ptr<LibraryItem> item, std::shared_ptr<LibraryPatron> patron) : item_(item), patron_(patron) {
-        // TODO: Implement checkout logic
-        // - Check if item is available
-        // - Check if patron is active and can borrow more items
-        // - Update item status
-        // - Calculate due date
         }
 
         //Getter
