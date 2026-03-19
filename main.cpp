@@ -22,18 +22,31 @@ class Return;
 class LibraryException;
 
 // Base exception class for library-related erros
-class LibraryEception : public std::runtime_error{
+class LibraryExeption : public std::runtime_error{
 public:
     // Constructor
-    LibraryEception(const std::string& message) : std::runtime_error(message){}
+    LibraryExeption(const std::string& message) : std::runtime_error(message){}
 };
 
 // Specific Error Type - ItemNotFoundException
 
-class ItemNotFoundException : public LibraryEception{
+class ItemNotFoundException : public LibraryExeption{
 
     public:
-    ItemNotFoundException(std::string& id) : LibraryEception("Item is not found, "+id){}
+    ItemNotFoundException(std::string& id) : LibraryExeption("Item is not found, "+id){}
+
+};
+
+class NotValidNumberException : public LibraryExeption{
+
+    public:
+    NotValidNumberException(std::string& id) : LibraryExeption("Item is not valid number, "+id){}
+
+};
+class NotAvailableException : public LibraryExeption{
+
+    public:
+    NotAvailableException(std::string& id) : LibraryExeption("Item is not valid number, "+id){}
 
 };
 
@@ -71,7 +84,7 @@ public:
     //Common Functionality
     void checkOut(){
         if(!available){
-            throw LibraryEception("Item is not avaialable for check out");
+            throw NotAvailableException(id);
         }
         available = false;
     }
@@ -98,8 +111,8 @@ public:
     //Implement pure virtual methdds
     std::string getItemType() const override{ return "book";}
 
-    double calculateFine(int daysOverdue){ 
-        if(daysOverdue < 0) throw LibraryEception("Days overdue cannot be negative");
+    double calculateFine(int daysOverdue) override{ 
+        if(daysOverdue < 0) throw NotValidNumberException(getId());
         return dailyFine*daysOverdue;
     }
 
@@ -121,21 +134,91 @@ class Magazine : public LibraryItem{
         Magazine(std::string& id, std::string& title, std::string& publisher, int issueNumber, 
             std::string& publicationDate, int pageCount, std::string& category, int volume, std::string language) : LibraryItem(id,title), publisher_(publisher),
             issueNumber_(issueNumber), publicationDate_(publicationDate), pageCount_(pageCount), category_(category), volume_(volume), language_(language) {
-                std::cout << "Magazine, "+title+", "+"added."<<std::endl;
+                std::cout << "Magazine, "+title+", "+"created."<<std::endl;
+                dailyFine = 1.2;
+        }
+
+        double calculateFine( int daysOverDue){
+            if(daysOverDue < 0){
+                throw NotValidNumberException(getId());
+            }
+            return daysOverDue * dailyFine;
+        }
+        std::string getPublisher() const {
+            return publisher_;
+        }
+        int getIssueNumber() const{
+            return issueNumber_;
+        }
+        std::string getPublicationDate() const {
+            return publicationDate_;
+        }
+        int getPageCount() const{
+            return pageCount_;
+        }
+        std::string getCategory() const {
+            return category_;
+        }
+        int getVolume() const{
+            return volume_;
+        }
+        std::string getLanguage() const {
+            return language_;
+        }
+        std::string getDetails() const override{
+            return "The Magazine's publisher:" + publisher_+",\nIssue Number: "+std::to_string(issueNumber_)+",\nPublicition Date: "+publicationDate_+", \nPage Count: " 
+            + std::to_string(pageCount_)+",\nCategory: "+category_+", \nVolume: "+std::to_string(volume_)+",\nLanguage: "+language_+"\n";
+        }
+        std::string getItemType() const override{
+            return "Magazine";
         }
 };
 
 class DvD : public LibraryItem{
     private:
-        std::string director;
-        int duration;
-        std::string rating;
-        std::string genre;
-        std::vector<std::string> actors;
-        std::string releaseDate;
-        std::string language;
+        std::string director_;
+        int duration_;
+        std::string rating_;
+        std::string genre_;
+        std::vector<std::string> actors_; //That one might be changed
+        std::string releaseDate_;
+        std::string language_;
     public:
+        DvD(std::string& id, std::string& title, std::string& director, int duration, std::string& rating, std::string& genre,
+             std::vector<std::string> actors, std::string& releaseData, std::string& language): LibraryItem(id, title),  director_(director),
+                duration_(duration), rating_(rating), genre_(genre), actors_(actors), releaseDate_(releaseData), language_(language){
+                std::cout << "DvD, "+title+", "+"created."<<std::endl;
+                dailyFine = 1.5;
+             }
 
+        std::string getDirector() const {
+            return director_;
+        }
+        int getDuration() const {
+            return duration_;
+        }
+        std::string getRating() const {
+            return rating_;
+        }
+        std::string getGenre() const {
+            return genre_;
+        }
+        std::vector<std::string> getActors() const {
+            return actors_;
+        }
+        std::string getReleaseDate() const {
+            return releaseDate_;
+        }
+        std::string getLanguage() const {
+            return language_;
+        }
+        std::string getDetails() const override{
+            return "The DvD's Director:" + director_+",\nDuration: "+std::to_string(duration_)+",\nRating: "+rating_+
+            ",\Genre: "+genre_+", \nRelease Data: "+releaseDate_+",\nLanguage: "+language_+"\n";
+        }
+        std::string getItemType() const override {
+            return "DvD";
+        }
 };
 
 class Return : public LibraryItem{
