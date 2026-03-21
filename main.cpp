@@ -33,20 +33,20 @@ public:
 class ItemNotFoundException : public LibraryExeption{
 
     public:
-    ItemNotFoundException(std::string& id) : LibraryExeption("Item is not found, "+id){}
+    ItemNotFoundException(const std::string& id) : LibraryExeption("Item is not found, "+id){}
 
 };
 
 class NotValidNumberException : public LibraryExeption{
 
     public:
-    NotValidNumberException(std::string& id) : LibraryExeption("Item is not valid number, "+id){}
+    NotValidNumberException(const std::string& id) : LibraryExeption("Item is not valid number, "+id){}
 
 };
 class NotAvailableException : public LibraryExeption{
 
     public:
-    NotAvailableException(std::string& id) : LibraryExeption("Item is not valid number, "+id){}
+    NotAvailableException(const std::string& id) : LibraryExeption("Item is not valid number, "+id){}
 
 };
 
@@ -63,7 +63,7 @@ protected:
     double dailyFine;
     int maxLoanDays;
 public:
-    LibraryItem(std::string& i, std::string& t) : id(std::move(i)), title(std::move(t)), available(true), dailyFine(0.0), maxLoanDays(0) {}
+    LibraryItem(std::string i, std::string t) : id(std::move(i)), title(std::move(t)), available(true), dailyFine(0.0), maxLoanDays(0) {}
 
     virtual ~LibraryItem() {};
 
@@ -95,14 +95,16 @@ public:
 };
 
 class Book : public LibraryItem{
-private:
+protected:
     std::string author;
     std::string isbn;
     std::string genre;
 
 public:
-    Book(std::string& id, std::string& title, std::string& auth, std::string& isB, std::string& genr) : LibraryItem(std::move(id), std::move(title)), author(std::move(auth)), isbn(std::move(isB)), genre(std::move(genr)){}
-
+    Book(std::string id, std::string title, std::string auth, std::string isB, std::string genr) : LibraryItem(std::move(id), std::move(title)), author(std::move(auth)), isbn(std::move(isB)), genre(std::move(genr)){
+        dailyFine = 1.4; // Fine rate for book
+    }
+    ~Book() = default;
     //Getters
     std::string getAuthor() const {return author;}
     std::string getIsBn() const {return isbn;}
@@ -117,10 +119,97 @@ public:
     }
 
     std::string getDetails() const override{
-        return "The book's author:" + author+", isbn: "+isbn+", genre: "+genre+"\n";
+        return "The book's Author:" + author+", Isbn: "+isbn+", Genre: "+genre+"\n";
     }
 };
 
+//Derived Classes From Book
+class Fiction : public Book{
+private:
+    std::string subGen_;
+    std::string targetAudience_;
+    std::string seriesName_;
+    int seriesIndex_;
+    std::string setting_;
+public:
+    Fiction(std::string id,std::string author,std::string genre,std::string isbn,std::string title,std::string subGeb,
+         std::string targetAudience, std::string seriesName, int seriesIndex, std::string setting):
+         Book(std::move(id),std::move(title),std::move(author),std::move(isbn),std::move(genre)) 
+         ,subGen_(std::move(subGeb)), targetAudience_(std::move(targetAudience)), seriesIndex_(std::move(seriesIndex)), seriesName_(std::move(seriesName)), setting_(std::move(setting)) {
+            std::cout << "Fiction book is created" << std::endl; 
+            dailyFine = 1.6; // Fine rate for Fiction Book
+    }
+    ~Fiction() = default;
+
+    //Getter
+    std::string getSubGen() { return subGen_;};
+    std::string getTargetAudience() { return targetAudience_;};
+    std::string getSeriesName() { return seriesName_;};
+    std::string getSetting() { return setting_;};
+    int getSeriesIndex() { return seriesIndex_;};
+
+    //Override
+    std::string getItemType() const override{
+        return "Fiction Book";
+    }
+
+    double calculateFine(int daysOverdue) override{
+        if(daysOverdue < 0) throw NotValidNumberException(getId());
+        return daysOverdue * dailyFine;
+    }
+
+    std::string getDetails() const override{
+        return "The fiction book's Author:" + author+", Isbn: "+isbn+", Genre: "+genre+",\nSubGenre: "+subGen_+", Series: "+seriesName_+", Audience: "+targetAudience_;
+    }
+
+    //Behaviours
+    std::string getReadingRecmmedantion(){
+        if(subGen_ == "Fantasy"){
+            return "Recommended for long-term reading";
+        } else if(subGen_ == "standalone"){
+            return "Quick read";
+        } else {
+            return "It can be read";
+        }
+    }
+};
+
+class NonFiction : public Book{
+private:
+    std::string subject_;
+    std::string edition_;
+    std::string level_;
+    int publicationYear_;
+public:
+    NonFiction(std::string id, std::string title,std::string author, std::string isbn, std::string genre,
+         std::string subject, std::string edition, std::string level, int publicationYear): Book(std::move(id),std::move(title),std::move(author),std::move(isbn),
+         std::move(genre)), subject_(std::move(subject)), edition_(std::move(edition)), level_(std::move(level)), publicationYear_(publicationYear) {
+            dailyFine = 1.5; // Fine rate for Non-Fiction Book
+    }
+    ~NonFiction() = default;
+
+    //Overrides
+    std::string getItemType() const override{ return "Non Fiction Book";}
+    std::string getDetails() const override{ return "The fiction book's Author:" + author+", Isbn: "+isbn+", Genre: "+genre+
+        ",\nSubject: "+subject_+", Edition: "+edition_+", Level: "+level_+", Publication Year: "+std::to_string(publicationYear_);}
+    double calculateFine(int daysOverdue) override{ if(daysOverdue < 0) throw NotValidNumberException(getId()); return daysOverdue* dailyFine;}
+
+    //Getter
+    std::string getSubject() const { return subject_;}
+    std::string getEdition() const {return edition_;}
+    std::string getLevel() const {return level_;}
+    int getPublicationYear() const {return publicationYear_;}
+    //Behaviours
+    bool isOutDated(int currentyear) {
+        if(currentyear < 0) throw NotValidNumberException(getId());
+        return (currentyear - publicationYear_ >= 10) ? true : false;
+    }
+
+    bool isAdvancedLevel() {return (level_ == "Beginner") ? true : false;}
+
+};
+
+//Derived Class From Library Item
 class Magazine : public LibraryItem{
     private:
         std::string publisher_;
@@ -131,13 +220,13 @@ class Magazine : public LibraryItem{
         int volume_;
         std::string language_;
     public:
-        Magazine(std::string& id, std::string& title, std::string& publisher, int issueNumber, 
-            std::string& publicationDate, int pageCount, std::string& category, int volume, std::string language) : LibraryItem(id,title), publisher_(publisher),
+        Magazine(const std::string& id,const std::string& title,const std::string& publisher,const int issueNumber,const 
+            std::string& publicationDate, int pageCount,const std::string& category, int volume,const std::string language) : LibraryItem(id,title), publisher_(publisher),
             issueNumber_(issueNumber), publicationDate_(publicationDate), pageCount_(pageCount), category_(category), volume_(volume), language_(language) {
                 std::cout << "Magazine, "+title+", "+"created."<<std::endl;
                 dailyFine = 1.2;
         }
-
+        ~Magazine() = default;
         double calculateFine( int daysOverDue){
             if(daysOverDue < 0){
                 throw NotValidNumberException(getId());
@@ -184,13 +273,13 @@ class DvD : public LibraryItem{
         std::string releaseDate_;
         std::string language_;
     public:
-        DvD(std::string& id, std::string& title, std::string& director, int duration, std::string& rating, std::string& genre,
-             std::vector<std::string> actors, std::string& releaseData, std::string& language): LibraryItem(id, title),  director_(director),
+        DvD(const std::string& id,const std::string& title,const std::string& director, int duration,const std::string& rating,const std::string& genre,
+             std::vector<std::string> actors,const std::string& releaseData,const std::string& language): LibraryItem(id, title),  director_(director),
                 duration_(duration), rating_(rating), genre_(genre), actors_(actors), releaseDate_(releaseData), language_(language){
                 std::cout << "DvD, "+title+", "+"created."<<std::endl;
                 dailyFine = 1.5;
              }
-
+        ~DvD() = default;
         std::string getDirector() const {
             return director_;
         }
@@ -221,10 +310,6 @@ class DvD : public LibraryItem{
         }
 };
 
-class Return : public LibraryItem{
-
-};
-
 // Base class for all library patrons
 
 class LibraryPatron {
@@ -237,7 +322,7 @@ protected:
     int maxBorrowItems;
 public:
     //Constructor
-    LibraryPatron(std::string& id, std::string& name, std::string& contactInfo): id_(id), name_(name), contactInfo_(contactInfo), active_(true), maxBorrowItems(0) {
+    LibraryPatron(const std::string& id,const std::string& name,const std::string& contactInfo): id_(id), name_(name), contactInfo_(contactInfo), active_(true), maxBorrowItems(0) {
         std::cout << "Name: " + name + ", Contact Info: " + contactInfo <<std::endl;
     }
 
@@ -251,7 +336,7 @@ public:
 
     //Setter
     void setActive(bool active) { active_ = active;}
-    void setContactInfo(std::string& contactinfo){ contactInfo_ = contactinfo;}
+    void setContactInfo(const std::string& contactinfo){ contactInfo_ = contactinfo;}
 
     //Pure virutal functions
     virtual std::string getPatronType() const = 0;
@@ -269,12 +354,12 @@ private:
     std::string major_;
 
 public:
-    Student(std::string& id, std::string& name, std::string contactInfo, std::string studentId, std::string major) 
+    Student( std::string id, std::string name, std::string contactInfo, std::string studentId, std::string major) 
     : LibraryPatron(std::move(id), std::move(name), std::move(contactInfo)), studentId_(std::move(studentId)), major_(std::move(major)) {
         maxBorrowItems = 20;
         std::cout << "Type: " << getPatronType() + ", Max Number of Borrow Item : " + std::to_string(maxBorrowItems) << std::endl;
     }
-
+    ~Student() = default;
     //Getter 
     std::string getStudentId() const{ return studentId_;}
     std::string getMajor() const { return major_;}
@@ -285,9 +370,51 @@ public:
 };
 
 class Faculty : public LibraryPatron{
+private:
+    std::string department_;
+    std::string position_;
+    int officeNumber_;
+public:
+    Faculty(std::string id, std::string name, std::string contactInfo, std::string department, std::string position,int officeNumber) :
+     LibraryPatron(std::move(id),std::move(name), std::move(contactInfo)), department_(std::move(department)), position_(std::move(position)), officeNumber_(std::move(officeNumber)){
 
+    }
+    ~Faculty() =default;
+
+
+    //Overrides
+    std::string getPatronType() const override {return "Faculty";}
+    int getLoanExtensionDays() const override{ return 3;}
+
+    //Behavirous
+    std::string getFullRoleInfo() { return getName()+"'s Deparment: "+department_+", Position: "+position_+", and Office Number: "+ std::to_string(officeNumber_);}
 };
 
+class GeneralPublic : public LibraryPatron{
+private:
+    std::string membershipType_;
+    int membershipExperyYear_;
+    bool registrationFreePaid_;
+public:
+    GeneralPublic(std::string id, std::string name, std::string contactInfo,std::string membershipType, int membershipExperyYear, bool registrationFreePaid):
+     LibraryPatron(std::move(id),std::move(name), std::move(contactInfo)),
+      membershipType_(std::move(membershipType)), membershipExperyYear_(std::move(membershipExperyYear)), registrationFreePaid_(std::move(registrationFreePaid)) {}
+    ~GeneralPublic() = default;
+
+
+    //Overrides
+    std::string getPatronType() const override {return "General Public";}
+    int getLoanExtensionDays() const override{ return 7;}
+
+    //Getters
+    std::string getMembershipType() const { return membershipType_;}
+    int getMembershipExperyYear() const {return membershipExperyYear_;}
+    bool getRegistrationFreePaid() const {return registrationFreePaid_;}
+
+    //Behavirous
+    bool hasValidMembership(int currentYear) { return (currentYear <= membershipExperyYear_) ? true : false;}
+
+};
 // Base Class For Transaction
 
 class Transaction  {
@@ -326,6 +453,61 @@ class Transaction  {
         virtual std::string getDetails() const = 0;
 };
 
+//Derived Class
+
+class Return : public Transaction{
+private:
+    std::shared_ptr<LibraryItem> item_;
+    std::shared_ptr<LibraryPatron> patron_;
+    std::chrono::system_clock::time_point dueDate_;
+    int fineAmount_;
+public:
+    Return(std::shared_ptr<LibraryItem> item, std::shared_ptr<LibraryPatron> patron) : item_(item), patron_(patron){
+        dueDate_ = getTimestamp() + std::chrono::hours(24*patron_->getLoanExtensionDays());
+    }
+    ~Return() = default;
+
+    //Getter
+    std::shared_ptr<LibraryItem> getItem() const { return item_;}
+    std::shared_ptr<LibraryPatron> getPatron() const {return patron_;}
+    std::chrono::system_clock::time_point getDueDate() const { return dueDate_;}    
+
+    //Overrides
+    std::string getTransactionType() const override{
+        return "Return";
+    }
+
+    std::string getDetails() const override{
+        auto time_t_due = std::chrono::system_clock::to_time_t(dueDate_);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&time_t_due), "%Y-%m-%d");
+
+        return "RETURN: Item: "+ item_->getTitle()+", Patron: "+patron_->getName()+", and Overdue Date: "+ ss.str();
+    }
+
+    //Behavirous
+
+    bool isLate(){
+        return dueDate_ > std::chrono::system_clock::now();
+    }
+
+    int getDaysLate(){
+        auto now = std::chrono::system_clock::now();
+        auto overdueLate = now-dueDate_;
+        auto delayDays = std::chrono::duration_cast<std::chrono::hours>(overdueLate).count();
+
+        return delayDays;
+    }
+
+    int calculateFine(){
+        auto now = std::chrono::system_clock::now();
+        auto overdueLate = now-dueDate_;
+        auto delayDays = std::chrono::duration_cast<std::chrono::hours>(overdueLate).count();
+
+        return item_->calculateFine(delayDays*fineAmount_);
+    }
+};
+
 //Checkout Derives
 
 class Checkout : public Transaction {
@@ -337,6 +519,7 @@ class Checkout : public Transaction {
 
     public:
         Checkout(std::shared_ptr<LibraryItem> item, std::shared_ptr<LibraryPatron> patron) : item_(item), patron_(patron) {
+            dueDate_ = getTimestamp() + std::chrono::hours(24*patron_->getLoanExtensionDays());
         }
 
         //Getter
@@ -344,8 +527,10 @@ class Checkout : public Transaction {
         std::shared_ptr<LibraryPatron> getPatron() const {return patron_;}
         std::chrono::system_clock::time_point getDueDate() const { return dueDate_;}
 
-        //Format due date as string
+        //Format duedate as string
         std::string getFormattedDueDate() const {
+            //Formating here
+            dueDate_ = std::chrono::system_clock::now() + std::chrono::hours(24*patron_->getLoanExtensionDays());
             auto time_t_due = std::chrono::system_clock::to_time_t(dueDate_);
             std::stringstream ss;
 
@@ -356,15 +541,17 @@ class Checkout : public Transaction {
 
         // Check if item is overdue
         bool isOverdue() const {
-
-            return false;
+            return std::chrono::system_clock::now() > dueDate_;
         }
 
         // Calculate overdue fine
 
         double calculateFine() const{
+            auto now = std::chrono::system_clock::now();
+            auto overdueDuration = now - dueDate_;
+            auto daysLate = std::chrono::duration_cast<std::chrono::hours>(overdueDuration).count() / 24;
 
-            return 0.0;
+            return item_->calculateFine(daysLate);
         }
 
         //Implement pure virtual function
@@ -373,8 +560,51 @@ class Checkout : public Transaction {
         }
 
         std::string getDetails() const override{
-            return "";
+        auto time_t_due = std::chrono::system_clock::to_time_t(dueDate_);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&time_t_due), "%Y-%m-%d");
+
+        return "CHECKOUT: Item: "+ item_->getTitle()+", Patron: "+patron_->getName()+", and Overdue Date: "+ ss.str();
         }
+};
+
+class Reservation : public Transaction{
+private:
+        std::shared_ptr<LibraryItem> item_;
+        std::shared_ptr<LibraryPatron> patron_;
+        std::string status_;
+        std::chrono::system_clock::time_point pickupDeadline_;
+public:
+    Reservation(std::shared_ptr<LibraryItem> item,std::shared_ptr<LibraryPatron> patron,std::string status): item_(item), patron_(patron), status_(std::move(status)){
+        pickupDeadline_ = getTimestamp() + std::chrono::hours(24*patron_->getLoanExtensionDays());
+    }
+    ~Reservation() = default;
+
+    //Overrides
+    std::string getTransactionType() const override{
+        return "Reservation";
+    }
+
+    std::string getDetails() const override{
+        auto time_t_due = std::chrono::system_clock::to_time_t(dueDate_);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&time_t_due), "%Y-%m-%d");
+
+        return "RESERVATION: Item: "+ item_->getTitle()+", Patron: "+patron_->getName()+", and Pickup Deadline: "+ ss.str();
+    }
+
+    bool isExpired() {
+        return pickupDeadline_ < std::chrono::system_clock::now();
+    }
+
+    bool cancelReservation() {
+        status = "Canceled"; 
+        return true;
+    }
+
+    bool markReadyForPickup() {
+        return true;
+    }
 };
 
 class Library {
